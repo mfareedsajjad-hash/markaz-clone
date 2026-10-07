@@ -1,22 +1,26 @@
 from werkzeug.security import generate_password_hash
-from flask import Flask, render_template, request, redirect, url_for, flash, abort
 from flask_login import LoginManager, login_user, logout_user, login_required, current_user
 from datetime import datetime
 from config import Config
 from models import db, User, Category, Product, CartItem, Order, OrderItem
 from seed import seed_data
+from flask import Flask, render_template, request, redirect, url_for, flash
 from flask_mail import Mail, Message
 
-# Mail Configuration
+# 1. Pehle Flask app create karein
+app = Flask(__name__)
+
+# 2. Phir app.config ki lines likhein (Line ke start mein koi extra space na ho)
+app.config['SECRET_KEY'] = 'your-secret-key-here'
 app.config['MAIL_SERVER'] = 'smtp.gmail.com'
 app.config['MAIL_PORT'] = 587
 app.config['MAIL_USE_TLS'] = True
-app.config['MAIL_USERNAME'] = 'APNI_GMAIL_ID@gmail.com'  # Yahan apni Gmail ID likhein
-app.config['MAIL_PASSWORD'] = 'vasqdtgboglvwpbt'        # Aap ka App Password
-app.config['MAIL_DEFAULT_SENDER'] = 'APNI_GMAIL_ID@gmail.com'
+app.config['MAIL_USERNAME'] = 'APNI_REAL_GMAIL@gmail.com'  # Apni real Gmail likhein
+app.config['MAIL_PASSWORD'] = 'vasqdtgboglvwpbt'        # App password
+app.config['MAIL_DEFAULT_SENDER'] = 'APNI_REAL_GMAIL@gmail.com'
 
+# 3. Phir mail ko initialize karein
 mail = Mail(app)
-
 app = Flask(__name__)
 app.config.from_object(Config)
 
