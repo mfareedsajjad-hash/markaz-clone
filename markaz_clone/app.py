@@ -1,26 +1,26 @@
-from werkzeug.security import generate_password_hash
+from flask import Flask, render_template, request, redirect, url_for, flash, abort
 from flask_login import LoginManager, login_user, logout_user, login_required, current_user
 from datetime import datetime
 from config import Config
 from models import db, User, Category, Product, CartItem, Order, OrderItem
 from seed import seed_data
-from flask import Flask, render_template, request, redirect, url_for, flash, abort
 from flask_mail import Mail, Message
 
-# 1. Single App Instance Create Karein
+# 1. App initialization
 app = Flask(__name__)
 app.config.from_object(Config)
 
-# 2. Mail Configuration
+# 2. Mail Configuration (Yahan apni Asli Gmail ID likhein)
+app.config['SECRET_KEY'] = 'your-secret-key-here'
 app.config['MAIL_SERVER'] = 'smtp.gmail.com'
 app.config['MAIL_PORT'] = 587
 app.config['MAIL_USE_TLS'] = True
-app.config['MAIL_USERNAME'] = 'mfareedsajjad@gmail.com'  # <-- Apna Real Gmail Address Likhein
-app.config['MAIL_PASSWORD'] = 'vasqdtgboglvwpbt'        # <-- Gmail App Password
-app.config['MAIL_DEFAULT_SENDER'] = 'mfareedsajjad@gmail.com' # <-- Apna Real Gmail Address Likhein
+app.config['MAIL_USERNAME'] = 'your_actual_email@gmail.com'  # <--- Asli Gmail ID
+app.config['MAIL_PASSWORD'] = 'vasqdtgboglwpbt'             # <--- Aap ka App Password
+app.config['MAIL_DEFAULT_SENDER'] = 'your_actual_email@gmail.com' # <--- Asli Gmail ID
 
+# 3. Mail Initialize
 mail = Mail(app)
-
 db.init_app(app)
 login_manager = LoginManager()
 login_manager.init_app(app)
