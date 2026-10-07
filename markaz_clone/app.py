@@ -15,9 +15,9 @@ app.config.from_object(Config)
 app.config['MAIL_SERVER'] = 'smtp.gmail.com'
 app.config['MAIL_PORT'] = 587
 app.config['MAIL_USE_TLS'] = True
-app.config['MAIL_USERNAME'] = 'APNI_REAL_GMAIL@gmail.com'  # <-- Apna Real Gmail Address Likhein
+app.config['MAIL_USERNAME'] = 'mfareedsajjad@gmail.com'  # <-- Apna Real Gmail Address Likhein
 app.config['MAIL_PASSWORD'] = 'vasqdtgboglvwpbt'        # <-- Gmail App Password
-app.config['MAIL_DEFAULT_SENDER'] = 'APNI_REAL_GMAIL@gmail.com' # <-- Apna Real Gmail Address Likhein
+app.config['MAIL_DEFAULT_SENDER'] = 'mfareedsajjad@gmail.com' # <-- Apna Real Gmail Address Likhein
 
 mail = Mail(app)
 
