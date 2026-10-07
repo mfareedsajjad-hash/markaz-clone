@@ -5,6 +5,17 @@ from datetime import datetime
 from config import Config
 from models import db, User, Category, Product, CartItem, Order, OrderItem
 from seed import seed_data
+from flask_mail import Mail, Message
+
+# Mail Configuration
+app.config['MAIL_SERVER'] = 'smtp.gmail.com'
+app.config['MAIL_PORT'] = 587
+app.config['MAIL_USE_TLS'] = True
+app.config['MAIL_USERNAME'] = 'APNI_GMAIL_ID@gmail.com'  # Yahan apni Gmail ID likhein
+app.config['MAIL_PASSWORD'] = 'vasqdtgboglvwpbt'        # Aap ka App Password
+app.config['MAIL_DEFAULT_SENDER'] = 'APNI_GMAIL_ID@gmail.com'
+
+mail = Mail(app)
 
 app = Flask(__name__)
 app.config.from_object(Config)
@@ -224,7 +235,7 @@ def remove_from_cart(item_id):
 # ───────────────────────── Checkout & Orders ─────────────────────────
 
 @app.route("/checkout", methods=["GET", "POST"])
-@login_required
+@login_required 
 def checkout():
     items = current_user.cart_items
     if not items:
@@ -272,27 +283,39 @@ def checkout():
             db.session.delete(item)
 
         db.session.commit()
+
+        # --- EMAIL NOTIFICATION START ---
+        try:
+            msg = Message(
+                subject=f"Order Confirmation - Markaz Clone #{order.id}",
+                recipients=[current_user.email]
+            )
+            msg.body = f"""
+            Assalam-o-Alaikum {current_user.email},
+
+            Aap ka order successfully place ho gaya hai!
+
+            Order Details:
+            ----------------------------------
+            Order ID: #{order.id}
+            Total Amount: Rs. {order.total}
+            Payment Method: Cash on Delivery
+            Shipping Address: {order.shipping_address}, {order.city}
+
+            Hum aap ka order jald dispatch kar dein ge.
+
+            Shukriya,
+            Markaz Clone Team
+            """
+            mail.send(msg)
+        except Exception as e:
+            print("Email sending failed:", e)
+        # --- EMAIL NOTIFICATION END ---
+
         flash(f"Order #{order.id} placed successfully! Pay Cash on Delivery.", "success")
         return redirect(url_for("order_detail", order_id=order.id))
 
     return render_template("checkout.html", items=items, total=total)
-
-
-@app.route("/orders")
-@login_required
-def my_orders():
-    orders = Order.query.filter_by(user_id=current_user.id).order_by(Order.created_at.desc()).all()
-    return render_template("orders.html", orders=orders)
-
-
-@app.route("/order/<int:order_id>")
-@login_required
-def order_detail(order_id):
-    order = Order.query.get_or_404(order_id)
-    if order.user_id != current_user.id and not current_user.is_admin:
-        abort(403)
-    return render_template("order_detail.html", order=order)
-
 
 # ───────────────────────── Admin Routes ─────────────────────────
 
