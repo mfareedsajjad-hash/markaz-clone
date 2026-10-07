@@ -4,25 +4,22 @@ from datetime import datetime
 from config import Config
 from models import db, User, Category, Product, CartItem, Order, OrderItem
 from seed import seed_data
-from flask import Flask, render_template, request, redirect, url_for, flash
+from flask import Flask, render_template, request, redirect, url_for, flash, abort
 from flask_mail import Mail, Message
 
-# 1. Pehle Flask app create karein
+# 1. Single App Instance Create Karein
 app = Flask(__name__)
+app.config.from_object(Config)
 
-# 2. Phir app.config ki lines likhein (Line ke start mein koi extra space na ho)
-app.config['SECRET_KEY'] = 'your-secret-key-here'
+# 2. Mail Configuration
 app.config['MAIL_SERVER'] = 'smtp.gmail.com'
 app.config['MAIL_PORT'] = 587
 app.config['MAIL_USE_TLS'] = True
-app.config['MAIL_USERNAME'] = 'APNI_REAL_GMAIL@gmail.com'  # Apni real Gmail likhein
-app.config['MAIL_PASSWORD'] = 'vasqdtgboglvwpbt'        # App password
-app.config['MAIL_DEFAULT_SENDER'] = 'APNI_REAL_GMAIL@gmail.com'
+app.config['MAIL_USERNAME'] = 'APNI_REAL_GMAIL@gmail.com'  # <-- Apna Real Gmail Address Likhein
+app.config['MAIL_PASSWORD'] = 'vasqdtgboglvwpbt'        # <-- Gmail App Password
+app.config['MAIL_DEFAULT_SENDER'] = 'APNI_REAL_GMAIL@gmail.com' # <-- Apna Real Gmail Address Likhein
 
-# 3. Phir mail ko initialize karein
 mail = Mail(app)
-app = Flask(__name__)
-app.config.from_object(Config)
 
 db.init_app(app)
 login_manager = LoginManager()
@@ -279,7 +276,6 @@ def checkout():
                 quantity=item.quantity
             )
             db.session.add(order_item)
-            # reduce stock
             item.product.stock = max(0, item.product.stock - item.quantity)
 
         # clear cart
@@ -295,7 +291,7 @@ def checkout():
                 recipients=[current_user.email]
             )
             msg.body = f"""
-            Assalam-o-Alaikum {current_user.email},
+            Assalam-o-Alaikum,
 
             Aap ka order successfully place ho gaya hai!
 
@@ -320,6 +316,23 @@ def checkout():
         return redirect(url_for("order_detail", order_id=order.id))
 
     return render_template("checkout.html", items=items, total=total)
+
+
+@app.route("/orders")
+@login_required
+def my_orders():
+    orders = Order.query.filter_by(user_id=current_user.id).order_by(Order.created_at.desc()).all()
+    return render_template("orders.html", orders=orders)
+
+
+@app.route("/order/<int:order_id>")
+@login_required
+def order_detail(order_id):
+    order = Order.query.get_or_404(order_id)
+    if order.user_id != current_user.id and not current_user.is_admin:
+        abort(403)
+    return render_template("order_detail.html", order=order)
+
 
 # ───────────────────────── Admin Routes ─────────────────────────
 
@@ -442,7 +455,6 @@ def admin_update_order_status(order_id):
 # ───────────────────────── Init ─────────────────────────
 with app.app_context():
     seed_data(app)
-    # Admin account ka password hash karke save karna
     admin_user = User.query.filter_by(email="admin@markaz.pk").first()
     if admin_user:
         admin_user.password = generate_password_hash("admin123")
