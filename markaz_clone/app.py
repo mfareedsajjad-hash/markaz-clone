@@ -1,3 +1,4 @@
+from werkzeug.security import generate_password_hash, check_password_hash
 from flask import Flask, render_template, request, redirect, url_for, flash, abort
 from flask_login import LoginManager, login_user, logout_user, login_required, current_user
 from datetime import datetime
@@ -11,13 +12,16 @@ app = Flask(__name__)
 app.config.from_object(Config)
 
 # 2. Mail Configuration (Yahan apni Asli Gmail ID likhein)
+# Mail Configuration
 app.config['SECRET_KEY'] = 'your-secret-key-here'
 app.config['MAIL_SERVER'] = 'smtp.gmail.com'
 app.config['MAIL_PORT'] = 587
 app.config['MAIL_USE_TLS'] = True
-app.config['MAIL_USERNAME'] = 'your_actual_email@gmail.com'  # <--- Asli Gmail ID
-app.config['MAIL_PASSWORD'] = 'vasqdtgboglwpbt'             # <--- Aap ka App Password
-app.config['MAIL_DEFAULT_SENDER'] = 'your_actual_email@gmail.com' # <--- Asli Gmail ID
+app.config['MAIL_USERNAME'] = 'your_actual_gmail@gmail.com'  # <-- Yahan apni real Gmail ID likhein
+app.config['MAIL_PASSWORD'] = 'upmfcolxhvpthlrc'             # <-- App Password
+app.config['MAIL_DEFAULT_SENDER'] = ('Markaz Clone', 'your_actual_gmail@gmail.com')
+
+mail = Mail(app)
 
 # 3. Mail Initialize
 mail = Mail(app)
